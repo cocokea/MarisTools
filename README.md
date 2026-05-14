@@ -1,33 +1,37 @@
 # MarisTools
 
-Plugin Bukkit/Folia dùng Gradle để build.
+MarisTools is a tool distribution plugin for giving configured utility items to players.
 
-## Build
+## What It Handles
 
-Yêu cầu Java 25 và có mạng để script `gradlew` tải Gradle 9.1.0 lần đầu:
+- Configurable tool definitions
+- Command-based tool delivery
+- Plugin reload for updated tool configuration
 
-```bash
-./gradlew build
-```
+## Requirements
 
-## Dependency chính
+- Paper / Folia 1.21+
+- Java 21
 
-- `io.papermc.paper:paper-api:26.1.2.build.+)
+## Installation
 
-## Files cấu hình
+1. Put the plugin jar in `plugins`.
+2. Start the server once.
+3. Edit `tools.yml`, `config.yml`, and `message.yml`.
+4. Restart the server.
 
-- `config.yml`
-- `message.yml`
-- `tools.yml`
+## Command
 
-## Lệnh
+- `/tools give <player> <tool>` - Give a configured tool.
+- `/tools reload` - Reload plugin files.
 
-- `/tools give <player> <tool> <duration>`
-- `/tools reload`
+## Files
 
-## Ghi chú triển khai
+- `tools.yml` - Tool definitions.
+- `config.yml` - Main settings.
+- `message.yml` - Command and error messages.
 
-- Dùng NBT để lưu `tool id`, `duration`, `expire runtime`.
-- Timer dựa trên **server runtime** nên khi server tắt thì thời gian sẽ pause.
-- Rocket lore được refresh mỗi 5 phút.
-- Drill phá 3x3 theo **mặt phẳng ngang**.
+## Notes
+
+- Tool behavior depends on the definitions stored in `tools.yml`.
+- Keep item identifiers and metadata consistent with your target server version.
