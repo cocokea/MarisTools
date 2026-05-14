@@ -1,0 +1,8 @@
+prefix: ""
+no-permission: "&cBạn không có quyền dùng lệnh này."
+player-not-found: "&cKhông tìm thấy người chơi &f%player%&c."
+invalid-tool: "&cTool không hợp lệ: &f%tool%&c."
+invalid-duration: "&cThời hạn không hợp lệ: &f%input%&c."
+give-success: "&aĐã đưa &f%tool% &acho &f%player% &avới thời hạn &f%duration%&a."
+reload-success: "&aĐã reload config, message và tools."
+expired: ""

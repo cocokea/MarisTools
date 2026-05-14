@@ -1,0 +1,50 @@
+tools:
+  drill:
+    material: NETHERITE_PICKAXE
+    name: "&#9300FFᴀᴍᴇᴛʜʏsᴛ ᴅʀɪʟʟ"
+    lore:
+      - "&7Breaks 9 Blocks at Once"
+    enchants:
+      EFFICIENCY: 5
+      UNBREAKING: 3
+      MENDING: 1
+  veinminer:
+    material: NETHERITE_PICKAXE
+    name: "&#9300FFᴀᴍᴇᴛʜʏsᴛ ᴠᴇɪɴᴍɪɴᴇʀ"
+    lore:
+      - "&7Quickly dig ore"
+    enchants:
+      EFFICIENCY: 5
+      UNBREAKING: 3
+      MENDING: 1
+  treechopper:
+    material: NETHERITE_AXE
+    name: "&#9300FFᴀᴍᴇᴛʜʏsᴛ ᴛʀᴇᴇᴄʜᴏᴘᴘᴇʀ"
+    lore:
+      - "&7Breaks Trees Instantly"
+    enchants:
+      EFFICIENCY: 5
+      UNBREAKING: 3
+      MENDING: 1
+  bucket:
+    material: BUCKET
+    name: "&#9300FFᴀᴍᴇᴛʜʏsᴛ ʙᴜᴄᴋᴇᴛ"
+    lore:
+      - "&7Drains 27 Water At Once"
+    enchants: {}
+  rocket:
+    material: FIREWORK_ROCKET
+    name: "&#9300FFᴀᴍᴇᴛʜʏsᴛ ʀᴏᴄᴋᴇᴛ"
+    lore:
+      - "&7Unlimited fireworks"
+    enchants: {}
+  sellaxe:
+    material: NETHERITE_AXE
+    name: "&#9300FFᴀᴍᴇᴛʜʏsᴛ sᴇʟʟ ᴀxᴇ"
+    lore:
+      - "&7Sells all items in chest containers"
+    enchants:
+      EFFICIENCY: 5
+      UNBREAKING: 3
+      MENDING: 1
+      SILK_TOUCH: 1

@@ -1,0 +1,21 @@
+name: MarisTools
+version: '1.0'
+main: com.maris.tools.MarisToolsPlugin
+api-version: '1.21'
+depend: [NBTAPI]
+softdepend: [MarisWorth]
+folia-supported: true
+commands:
+  tools:
+    description: Main command for MarisTools
+    usage: /tools <give|reload>
+permissions:
+  maristools.admin:
+    default: op
+    children:
+      maristools.command.give: true
+      maristools.command.reload: true
+  maristools.command.give:
+    default: op
+  maristools.command.reload:
+    default: op

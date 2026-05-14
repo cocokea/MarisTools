@@ -1,0 +1,18 @@
+settings:
+  held-sound: BLOCK_AMETHYST_BLOCK_RESONATE
+  timer-refresh-ticks: 6000 # 5 minutes
+  expired-scan-ticks: 200
+  tree-max-blocks: 512
+  veinminer-max-blocks: 48
+  veinminer-search-radius: 1
+  veinminer-requires-sneak: true
+  veinminer-need-correct-tool: true
+  drill-break-sound: BLOCK_AMETHYST_BLOCK_BREAK
+  timer-warning-ms: 86400000
+  blacklist-worlds:
+    - worlds:spawn
+    - worlds:afk
+  blacklist-blocks:
+    - BEDROCK
+runtime:
+  elapsed-ms: 0
