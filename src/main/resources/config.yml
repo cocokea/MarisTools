@@ -1,5 +1,8 @@
+update-checker: true
+
 settings:
   held-sound: BLOCK_AMETHYST_BLOCK_RESONATE
+  booster-success-sound: BLOCK_AMETHYST_BLOCK_FALL
   timer-refresh-ticks: 6000 # 5 minutes
   expired-scan-ticks: 200
   tree-max-blocks: 512

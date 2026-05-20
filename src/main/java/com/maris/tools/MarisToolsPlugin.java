@@ -3,6 +3,7 @@ package com.maris.tools;
 import com.maris.tools.command.ToolsCommand;
 import com.maris.tools.config.MessageService;
 import com.maris.tools.config.ToolConfigService;
+import com.maris.tools.hook.MarisAfkZoneBridge;
 import com.maris.tools.listener.ToolListener;
 import com.maris.tools.hook.MarisWorthBridge;
 import com.maris.tools.service.ExpirationService;
@@ -25,11 +26,15 @@ public final class MarisToolsPlugin extends JavaPlugin {
     private ExpirationService expirationService;
     private ToolListener toolListener;
     private MarisWorthBridge marisWorthBridge;
+    private MarisAfkZoneBridge marisAfkZoneBridge;
     private ToolsCommand toolsCommand;
 
     @Override
     public void onEnable() {
+        
         saveDefaultConfig();
+        MarisPluginStartup.bootstrap(this, "cocokea/MarisTools");
+saveDefaultConfig();
         saveResourceIfMissing("message.yml");
         saveResourceIfMissing("tools.yml");
         loadExtraConfigs();
@@ -39,6 +44,7 @@ public final class MarisToolsPlugin extends JavaPlugin {
         this.runtimeClockService = new RuntimeClockService(this);
         this.expirationService = new ExpirationService(this, runtimeClockService);
         this.marisWorthBridge = new MarisWorthBridge(this);
+        this.marisAfkZoneBridge = new MarisAfkZoneBridge(this);
 
         runtimeClockService.start();
         expirationService.start();
@@ -121,6 +127,10 @@ public final class MarisToolsPlugin extends JavaPlugin {
 
     public MarisWorthBridge marisWorthBridge() {
         return marisWorthBridge;
+    }
+
+    public MarisAfkZoneBridge marisAfkZoneBridge() {
+        return marisAfkZoneBridge;
     }
 
 }

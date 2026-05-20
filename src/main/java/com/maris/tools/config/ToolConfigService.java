@@ -44,6 +44,7 @@ public final class ToolConfigService {
 
             String name = toolSection.getString("name", id);
             List<String> lore = new ArrayList<>(toolSection.getStringList("lore"));
+            boolean hideEnchants = toolSection.getBoolean("hide-enchants", false);
             Map<Enchantment, Integer> enchants = new HashMap<>();
             ConfigurationSection enchantSection = toolSection.getConfigurationSection("enchants");
             if (enchantSection != null) {
@@ -56,7 +57,7 @@ public final class ToolConfigService {
                     enchants.put(enchantment, enchantSection.getInt(enchantKey));
                 }
             }
-            tools.put(id.toLowerCase(Locale.ROOT), new ToolDefinition(id.toLowerCase(Locale.ROOT), material, name, lore, enchants));
+            tools.put(id.toLowerCase(Locale.ROOT), new ToolDefinition(id.toLowerCase(Locale.ROOT), material, name, lore, enchants, hideEnchants));
         }
     }
 

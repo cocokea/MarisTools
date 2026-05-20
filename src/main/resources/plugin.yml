@@ -3,7 +3,7 @@ version: '1.0'
 main: com.maris.tools.MarisToolsPlugin
 api-version: '1.21'
 depend: [NBTAPI]
-softdepend: [MarisWorth]
+softdepend: [MarisWorth, MarisAFKZone]
 folia-supported: true
 commands:
   tools:

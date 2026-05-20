@@ -31,6 +31,9 @@ public final class ToolFactory {
         definition.enchants().forEach((enchant, level) -> meta.addEnchant(enchant, level, true));
         try {
             meta.addItemFlags(ItemFlag.HIDE_ATTRIBUTES);
+            if (definition.hideEnchants() && !definition.enchants().isEmpty()) {
+                meta.addItemFlags(ItemFlag.HIDE_ENCHANTS);
+            }
         } catch (Throwable ignored) {
         }
         item.setItemMeta(meta);
@@ -67,6 +70,10 @@ public final class ToolFactory {
         try {
             if (!meta.getItemFlags().contains(ItemFlag.HIDE_ATTRIBUTES)) {
                 meta.addItemFlags(ItemFlag.HIDE_ATTRIBUTES);
+                changed = true;
+            }
+            if (definition.hideEnchants() && !definition.enchants().isEmpty() && !meta.getItemFlags().contains(ItemFlag.HIDE_ENCHANTS)) {
+                meta.addItemFlags(ItemFlag.HIDE_ENCHANTS);
                 changed = true;
             }
         } catch (Throwable ignored) {

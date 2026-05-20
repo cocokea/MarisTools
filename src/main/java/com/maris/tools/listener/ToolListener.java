@@ -5,21 +5,22 @@ import com.maris.tools.service.ExpirationService;
 import com.maris.tools.service.RuntimeClockService;
 import com.maris.tools.util.FoliaSupport;
 import de.tr7zw.nbtapi.NBT;
+import org.bukkit.FluidCollisionMode;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.Registry;
 import org.bukkit.Sound;
-import org.bukkit.FluidCollisionMode;
 import org.bukkit.Tag;
 import org.bukkit.World;
+import org.bukkit.block.Barrel;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
-import org.bukkit.block.Barrel;
 import org.bukkit.block.BlockState;
 import org.bukkit.block.Chest;
 import org.bukkit.block.ShulkerBox;
 import org.bukkit.block.data.Waterlogged;
+import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.ExperienceOrb;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Event;
@@ -36,11 +37,11 @@ import org.bukkit.event.inventory.InventoryPickupItemEvent;
 import org.bukkit.event.player.PlayerBucketEmptyEvent;
 import org.bukkit.event.player.PlayerBucketFillEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.event.player.PlayerItemConsumeEvent;
 import org.bukkit.event.player.PlayerItemHeldEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
-import org.bukkit.enchantments.Enchantment;
-import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.DoubleChestInventory;
+import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.Damageable;
@@ -54,8 +55,8 @@ import java.util.Locale;
 import java.util.Queue;
 import java.util.Set;
 import java.util.concurrent.ThreadLocalRandom;
-
 import java.util.function.Function;
+
 public final class ToolListener implements Listener {
 
     private final Set<Material> blacklist;
@@ -112,7 +113,7 @@ public final class ToolListener implements Listener {
             return;
         }
 
-        if (toolId.equals("drill")) {
+        if (isDrillTool(toolId)) {
             event.setCancelled(true);
             FoliaSupport.runAtLocation(plugin, event.getBlock().getLocation(), () -> runDrill(player, event.getBlock(), tool));
             return;
@@ -190,7 +191,7 @@ public final class ToolListener implements Listener {
                 event.setUseInteractedBlock(Event.Result.DENY);
                 event.setUseItemInHand(Event.Result.DENY);
                 FoliaSupport.runAtLocation(plugin, target.getLocation(), () -> {
-                    drainWater(player, target, 27);
+                    drainWaterInstant(player, target, 27);
                     restoreBucket(player, event.getHand(), originalBucket);
                 });
             }
@@ -204,71 +205,75 @@ public final class ToolListener implements Listener {
         }
     }
 
-private void handleSellAxe(Player player, Block clicked) {
-    Inventory inventory = null;
-    String sourceName = null;
-    BlockState state = clicked.getState();
-    if (state instanceof Chest chest) {
-        inventory = chest.getInventory();
-        sourceName = inventory instanceof DoubleChestInventory ? "Large Chest" : "Chest";
-    } else if (state instanceof Barrel barrel) {
-        inventory = barrel.getInventory();
-        sourceName = "Barrel";
-    } else if (state instanceof ShulkerBox shulkerBox) {
-        inventory = shulkerBox.getInventory();
-        sourceName = "Shulker Box";
+    private boolean isDrillTool(String toolId) {
+        return toolId.equals("drill") || toolId.equals("shovel");
     }
-    if (inventory == null) {
-        return;
-    }
-    if (!plugin.marisWorthBridge().isHooked()) {
-        plugin.getLogger().warning("MarisWorth is not hooked, sell axe action skipped.");
-        return;
-    }
-    plugin.marisWorthBridge().sellContainer(player, inventory, sourceName);
-}
 
-@EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = false)
-public void onBucketFill(PlayerBucketFillEvent event) {
-    ItemStack original = event.getItemStack();
-    if (!"bucket".equalsIgnoreCase(getToolId(original))) {
-        ItemStack handItem = event.getPlayer().getInventory().getItem(event.getHand());
-        if (!"bucket".equalsIgnoreCase(getToolId(handItem))) {
+    private void handleSellAxe(Player player, Block clicked) {
+        Inventory inventory = null;
+        String sourceName = null;
+        BlockState state = clicked.getState();
+        if (state instanceof Chest chest) {
+            inventory = chest.getInventory();
+            sourceName = inventory instanceof DoubleChestInventory ? "Large Chest" : "Chest";
+        } else if (state instanceof Barrel barrel) {
+            inventory = barrel.getInventory();
+            sourceName = "Barrel";
+        } else if (state instanceof ShulkerBox shulkerBox) {
+            inventory = shulkerBox.getInventory();
+            sourceName = "Shulker Box";
+        }
+        if (inventory == null) {
             return;
         }
-        original = handItem.clone();
-    }
-
-    event.setCancelled(true);
-    restoreBucket(event.getPlayer(), event.getHand(), original);
-}
-
-@EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = false)
-public void onBucketEmpty(PlayerBucketEmptyEvent event) {
-    ItemStack original = event.getPlayer().getInventory().getItem(event.getHand());
-    if ("bucket".equalsIgnoreCase(getToolId(original))) {
-        event.setCancelled(true);
-        restoreBucket(event.getPlayer(), event.getHand(), original.clone());
-    }
-}
-
-private void restoreBucket(Player player, EquipmentSlot hand, ItemStack original) {
-    if (!"bucket".equalsIgnoreCase(getToolId(original))) {
-        return;
-    }
-    ItemStack restored = original.clone();
-    restored.setType(Material.BUCKET);
-    restored.setAmount(1);
-    FoliaSupport.runNextTick(plugin, player, () -> {
-        if (hand == EquipmentSlot.OFF_HAND) {
-            player.getInventory().setItemInOffHand(restored);
-        } else {
-            player.getInventory().setItemInMainHand(restored);
+        if (!plugin.marisWorthBridge().isHooked()) {
+            plugin.getLogger().warning("MarisWorth is not hooked, sell axe action skipped.");
+            return;
         }
-        player.updateInventory();
-        expirationService.scanInventory(player, player.getInventory(), false, true);
-    });
-}
+        plugin.marisWorthBridge().sellContainer(player, inventory, sourceName);
+    }
+
+    @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = false)
+    public void onBucketFill(PlayerBucketFillEvent event) {
+        ItemStack original = event.getItemStack();
+        if (!"bucket".equalsIgnoreCase(getToolId(original))) {
+            ItemStack handItem = event.getPlayer().getInventory().getItem(event.getHand());
+            if (!"bucket".equalsIgnoreCase(getToolId(handItem))) {
+                return;
+            }
+            original = handItem.clone();
+        }
+
+        event.setCancelled(true);
+        restoreBucket(event.getPlayer(), event.getHand(), original);
+    }
+
+    @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = false)
+    public void onBucketEmpty(PlayerBucketEmptyEvent event) {
+        ItemStack original = event.getPlayer().getInventory().getItem(event.getHand());
+        if ("bucket".equalsIgnoreCase(getToolId(original))) {
+            event.setCancelled(true);
+            restoreBucket(event.getPlayer(), event.getHand(), original.clone());
+        }
+    }
+
+    private void restoreBucket(Player player, EquipmentSlot hand, ItemStack original) {
+        if (!"bucket".equalsIgnoreCase(getToolId(original))) {
+            return;
+        }
+        ItemStack restored = original.clone();
+        restored.setType(Material.BUCKET);
+        restored.setAmount(1);
+        FoliaSupport.runNextTick(plugin, player, () -> {
+            if (hand == EquipmentSlot.OFF_HAND) {
+                player.getInventory().setItemInOffHand(restored);
+            } else {
+                player.getInventory().setItemInMainHand(restored);
+            }
+            player.updateInventory();
+            expirationService.scanInventory(player, player.getInventory(), false, true);
+        });
+    }
 
     private void restoreSlotLater(Player player, int slot, ItemStack snapshot, int repeats) {
         if (repeats <= 0) {
@@ -281,22 +286,22 @@ private void restoreBucket(Player player, EquipmentSlot hand, ItemStack original
         });
     }
 
-@EventHandler(ignoreCancelled = true)
-public void onSellAxeEntityInteract(org.bukkit.event.player.PlayerInteractEntityEvent event) {
-    ItemStack hand = event.getPlayer().getInventory().getItemInMainHand();
-    if ("sellaxe".equalsIgnoreCase(getToolId(hand))) {
-        event.setCancelled(true);
-    }
-}
-
-@EventHandler(ignoreCancelled = true)
-public void onSellAxeDamage(org.bukkit.event.entity.EntityDamageByEntityEvent event) {
-    if (event.getDamager() instanceof Player player) {
-        if ("sellaxe".equalsIgnoreCase(getToolId(player.getInventory().getItemInMainHand()))) {
+    @EventHandler(ignoreCancelled = true)
+    public void onSellAxeEntityInteract(org.bukkit.event.player.PlayerInteractEntityEvent event) {
+        ItemStack hand = event.getPlayer().getInventory().getItemInMainHand();
+        if ("sellaxe".equalsIgnoreCase(getToolId(hand))) {
             event.setCancelled(true);
         }
     }
-}
+
+    @EventHandler(ignoreCancelled = true)
+    public void onSellAxeDamage(org.bukkit.event.entity.EntityDamageByEntityEvent event) {
+        if (event.getDamager() instanceof Player player) {
+            if ("sellaxe".equalsIgnoreCase(getToolId(player.getInventory().getItemInMainHand()))) {
+                event.setCancelled(true);
+            }
+        }
+    }
 
     @EventHandler
     public void onHeld(PlayerItemHeldEvent event) {
@@ -311,6 +316,34 @@ public void onSellAxeDamage(org.bukkit.event.entity.EntityDamageByEntityEvent ev
     public void onJoin(PlayerJoinEvent event) {
         expirationService.scanInventory(event.getPlayer(), event.getPlayer().getInventory(), true, true);
         expirationService.scanInventory(event.getPlayer(), event.getPlayer().getEnderChest(), false, true);
+    }
+
+    @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
+    public void onConsume(PlayerItemConsumeEvent event) {
+        ItemStack item = event.getItem();
+        if (!"booster".equalsIgnoreCase(getToolId(item))) {
+            return;
+        }
+        Player player = event.getPlayer();
+        if (expirationService.isExpired(item)) {
+            breakExpiredConsumedTool(player, event.getHand());
+            return;
+        }
+        if (!plugin.marisAfkZoneBridge().activateBooster(player)) {
+            return;
+        }
+        event.setReplacement(new ItemStack(Material.AIR));
+        Sound sound = resolveConfiguredSound("settings.booster-success-sound", "BLOCK_AMETHYST_BLOCK_FALL");
+        FoliaSupport.runNextTick(plugin, player, () -> {
+            if (event.getHand() == EquipmentSlot.OFF_HAND) {
+                player.getInventory().setItemInOffHand(null);
+            } else {
+                player.getInventory().setItemInMainHand(null);
+            }
+            player.playSound(player.getLocation(), sound, 1f, 1f);
+            player.updateInventory();
+            expirationService.scanInventory(player, player.getInventory(), false, true);
+        });
     }
 
     @EventHandler
@@ -466,60 +499,36 @@ public void onSellAxeDamage(org.bukkit.event.entity.EntityDamageByEntityEvent ev
         updateMainHandTool(player, tool);
     }
 
-    private void drainWater(Player player, Block origin, int limit) {
+    private void drainWaterInstant(Player player, Block origin, int limit) {
         player.playSound(player.getLocation(), Sound.ITEM_BUCKET_FILL, 1f, 1f);
-        if (FoliaSupport.isFolia()) {
-            WaterDrainState state = new WaterDrainState(limit);
-            state.enqueue(origin.getLocation());
-            drainWaterFolia(state);
-            return;
-        }
+        Queue<Block> queue = new ArrayDeque<>();
+        Set<Long> visited = new HashSet<>(Math.min(limit * 2, 128));
+        List<Block> toDrain = new ArrayList<>(Math.min(limit, 27));
+        queue.add(origin);
 
-        Queue<Location> queue = new ArrayDeque<>();
-        Set<Long> visited = new HashSet<>();
-        queue.add(origin.getLocation());
-        int drained = 0;
-        while (!queue.isEmpty() && drained < limit) {
-            Location location = queue.poll();
-            long key = blockKey(location.getBlockX(), location.getBlockY(), location.getBlockZ());
-            if (!visited.add(key)) {
+        while (!queue.isEmpty() && toDrain.size() < limit) {
+            Block block = queue.poll();
+            long key = blockKey(block);
+            if (!visited.add(key) || !isWater(block)) {
                 continue;
             }
-            Block block = location.getBlock();
-            if (!isWater(block)) {
+            toDrain.add(block);
+            for (BlockFace face : CARDINALS) {
+                Block relative = block.getRelative(face);
+                if (!visited.contains(blockKey(relative)) && isWater(relative)) {
+                    queue.add(relative);
+                }
+            }
+        }
+
+        for (Block block : toDrain) {
+            if (block.getBlockData() instanceof Waterlogged waterlogged) {
+                waterlogged.setWaterlogged(false);
+                block.setBlockData(waterlogged, false);
                 continue;
             }
             block.setType(Material.AIR, false);
-            drained++;
-            for (BlockFace face : CARDINALS) {
-                queue.add(location.clone().add(face.getModX(), face.getModY(), face.getModZ()));
-            }
         }
-    }
-
-    private void drainWaterFolia(WaterDrainState state) {
-        Location next = state.pollNext();
-        if (next == null) {
-            return;
-        }
-
-        FoliaSupport.runAtLocation(plugin, next, () -> {
-            if (state.isLimitReached()) {
-                return;
-            }
-            Block regional = next.getBlock();
-            if (!isWater(regional)) {
-                drainWaterFolia(state);
-                return;
-            }
-            regional.setType(Material.AIR, false);
-            if (state.recordDrain()) {
-                for (BlockFace face : CARDINALS) {
-                    state.enqueue(next.clone().add(face.getModX(), face.getModY(), face.getModZ()));
-                }
-            }
-            drainWaterFolia(state);
-        });
     }
 
     private int breakToolBlock(Player player, Block block, ItemStack tool) {
@@ -572,47 +581,15 @@ public void onSellAxeDamage(org.bukkit.event.entity.EntityDamageByEntityEvent ev
         player.playSound(player.getLocation(), Sound.ENTITY_ITEM_BREAK, 1f, 1f);
     }
 
-    private final class WaterDrainState {
-        private final Queue<Location> queue = new ArrayDeque<>();
-        private final Set<Long> visited = new HashSet<>();
-        private final int limit;
-        private int drained;
-
-        private WaterDrainState(int limit) {
-            this.limit = limit;
+    private void breakExpiredConsumedTool(Player player, EquipmentSlot hand) {
+        if (hand == EquipmentSlot.OFF_HAND) {
+            player.getInventory().setItemInOffHand(null);
+        } else {
+            player.getInventory().setItemInMainHand(null);
         }
-
-        private synchronized void enqueue(Location location) {
-            queue.add(location);
-        }
-
-        private synchronized Location pollNext() {
-            while (!queue.isEmpty() && drained < limit) {
-                Location location = queue.poll();
-                if (location == null) {
-                    return null;
-                }
-                long key = blockKey(location.getBlockX(), location.getBlockY(), location.getBlockZ());
-                if (visited.add(key)) {
-                    return location;
-                }
-            }
-            return null;
-        }
-
-        private synchronized boolean recordDrain() {
-            if (drained >= limit) {
-                return false;
-            }
-            drained++;
-            return drained < limit;
-        }
-
-        private synchronized boolean isLimitReached() {
-            return drained >= limit;
-        }
+        player.playSound(player.getLocation(), Sound.ENTITY_ITEM_BREAK, 1f, 1f);
+        player.updateInventory();
     }
-
 
     private Block resolveBucketTarget(PlayerInteractEvent event) {
         Block target = event.getClickedBlock();

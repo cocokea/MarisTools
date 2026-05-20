@@ -8,6 +8,15 @@ tools:
       EFFICIENCY: 5
       UNBREAKING: 3
       MENDING: 1
+  shovel:
+    material: NETHERITE_SHOVEL
+    name: "&#9300FFᴀᴍᴇᴛʜʏsᴛ sʜᴏᴠᴇʟ"
+    lore:
+      - "&79 Blocks Per Break"
+    enchants:
+      EFFICIENCY: 5
+      UNBREAKING: 3
+      MENDING: 1
   veinminer:
     material: NETHERITE_PICKAXE
     name: "&#9300FFᴀᴍᴇᴛʜʏsᴛ ᴠᴇɪɴᴍɪɴᴇʀ"
@@ -31,7 +40,9 @@ tools:
     name: "&#9300FFᴀᴍᴇᴛʜʏsᴛ ʙᴜᴄᴋᴇᴛ"
     lore:
       - "&7Drains 27 Water At Once"
-    enchants: {}
+    hide-enchants: true
+    enchants:
+      MENDING: 1
   rocket:
     material: FIREWORK_ROCKET
     name: "&#9300FFᴀᴍᴇᴛʜʏsᴛ ʀᴏᴄᴋᴇᴛ"
@@ -48,3 +59,11 @@ tools:
       UNBREAKING: 3
       MENDING: 1
       SILK_TOUCH: 1
+  booster:
+    material: WATER_BOTTLE
+    name: "&#9300FFsʜᴀʀᴅ ʙᴏᴏsᴛᴇʀ"
+    lore:
+      - "&74x Shard Production for 24 hours"
+    hide-enchants: true
+    enchants:
+      MENDING: 1
